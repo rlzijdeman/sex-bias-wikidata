@@ -1,0 +1,26 @@
+# To run this query on wikidata goto: https://w.wiki/4FcE
+# This query counts humans by sex type and by century in a given place of birth (e.g London, New York or Utrecht).
+# Helps to show diversity in sex entries in wikidata
+SELECT (COUNT(?item) as ?total)  ?century ?sex ?sexLabel WHERE {
+# check here for the wd:Q code of other places: https://www.wikidata.org/w/index.php?search=london&search=london&title=Special%3ASearch&go=Go&ns0=1&ns120=1  
+#?item wdt:P19 wd:Q84 . # place of birth London
+#?item wdt:P19 wd:Q60 . # place of birth New York City  
+#?item wdt:P19 wd:Q803 . # place of birth Utrecht  
+?item wdt:P19 wd:Q90 . #place of birth Paris
+  
+?item wdt:P31 wd:Q5. # and an instance of human
+?item p:P569/psv:P569 [
+                wikibase:timePrecision "9"^^xsd:integer ; # precision of at least year
+                wikibase:timeValue ?birth ;
+              ] ;
+bind(floor(year(?birth)/100+1) as ?century) # create centuries as cohorts
+FILTER(?century >= 14)      
+      
+?item wdt:P21 ?sex # of type female
+      
+SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en" }
+
+}
+GROUP BY ?century ?sex ?sexLabel
+ORDER BY ASC(?century) ASC(?sexLabel)
+LIMIT 200
